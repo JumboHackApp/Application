@@ -5,162 +5,181 @@ const Questions = () => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     name: "",
-    firstLastName: "",
     schoolEmail: "",
-    universityYear: "",
-    concentration: "",
-    preferredWork: "",
-    jobType: "",
-    jobDuration: "",
-    keywords: "",
-    achievements: "",
-    freeTime: "",
-    inspiration: "",
+    university: "",
+    graduationYear: "",
+    major: "",
   });
 
   const handleNext = () => {
-    setStep(prev => prev + 1);
+    setStep((prevStep) => prevStep + 1);
   };
 
   return (
     <div className="phone-container">
-      {step === 1 && (
-        <div className="question-box">
-          <h2>Hi! What is your name?</h2>
-          <input
-            type="text"
-            placeholder="Ex: Jon Doe"
-            value={formData.name}
-            onChange={(e) =>
-              setFormData({ ...formData, name: e.target.value })
-            }
-            className="name-input"
-          />
-          <button onClick={handleNext} className="next-button">
-            Next →
-          </button>
-        </div>
-      )}
+      <div className="question-box">
+        {step === 1 && (
+          <>
+            <h2>Hi! What is your name?</h2>
+            <p className="subtext">Please enter your first and last name</p> {/* Add this with class */}
+            <input
+              type="text"
+              placeholder="Ex: John Doe"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+              className="name-input"
+            />
+          </>
+        )}
 
-      {step === 2 && (
-        <div className="question-box">
-          <h2>Your Academics</h2>
-          <input
-            type="text"
-            placeholder="First/Last Name"
-            value={formData.firstLastName}
-            onChange={(e) =>
-              setFormData({ ...formData, firstLastName: e.target.value })
-            }
-          />
-          <input
-            type="email"
-            placeholder="School email (must be @___.edu)"
-            value={formData.schoolEmail}
-            onChange={(e) =>
-              setFormData({ ...formData, schoolEmail: e.target.value })
-            }
-          />
-          <input
-            type="text"
-            placeholder="University and year"
-            value={formData.universityYear}
-            onChange={(e) =>
-              setFormData({ ...formData, universityYear: e.target.value })
-            }
-          />
-          <input
-            type="text"
-            placeholder="Concentration (N/A if undeclared)"
-            value={formData.concentration}
-            onChange={(e) =>
-              setFormData({ ...formData, concentration: e.target.value })
-            }
-          />
-          <button onClick={handleNext} className="next-button">
-            Next →
-          </button>
-        </div>
-      )}
+        {step === 2 && (
+          <>
+            <h2>What is your school email?</h2>
+            <input
+              type="email"
+              placeholder="Ex: john.doe@tufts.edu"
+              value={formData.schoolEmail}
+              onChange={(e) =>
+                setFormData({ ...formData, schoolEmail: e.target.value })
+              }
+              className="name-input"
+            />
+          </>
+        )}
 
-      {step === 3 && (
-        <div className="question-box">
-          <h2>Preferences</h2>
-          <select
+        {step === 3 && (
+          <>
+            <h2>What school do you go to?</h2>
+            <input
+              type="text"
+              placeholder="Ex: Tufts University"
+              value={formData.university}
+              onChange={(e) =>
+                setFormData({ ...formData, university: e.target.value })
+              }
+              className="name-input"
+            />
+          </>
+        )}
+
+        {step === 4 && (
+          <>
+            <h2>What year is your graduation?</h2>
+            <input
+              type="text"
+              placeholder="Ex: 2027"
+              value={formData.graduationYear}
+              onChange={(e) =>
+                setFormData({ ...formData, graduationYear: e.target.value })
+              }
+              className="name-input"
+            />
+          </>
+        )}
+
+        {step === 5 && (
+          <>
+            <h2>What is your major?</h2>
+            <input
+              type="text"
+              placeholder="Ex: Computer Science"
+              value={formData.major}
+              onChange={(e) =>
+                setFormData({ ...formData, major: e.target.value })
+              }
+              className="name-input"
+            />
+          </>
+        )}
+        {step === 6 && (
+        <>
+            <h2>Almost there!</h2>
+            <p className="subtext">Now let's enter your job preferences</p>
+        </>
+        )}
+
+        {step === 7 && (
+        <>
+            <h2>What is your preferred means of work?</h2>
+            <p className="subtext">(remote / on-site / hybrid)</p>
+            <input
+            type="text"
+            placeholder="Ex: On-site"
             value={formData.preferredWork}
             onChange={(e) =>
-              setFormData({ ...formData, preferredWork: e.target.value })
+                setFormData({ ...formData, preferredWork: e.target.value })
             }
-          >
-            <option value="">Preferred means of work (remote / on-site / hybrid)</option>
-            <option value="remote">Remote</option>
-            <option value="on-site">On-site</option>
-            <option value="hybrid">Hybrid</option>
-          </select>
-          <select
+            className="name-input"
+            />
+        </>
+        )}
+
+        {step === 8 && (
+        <>
+            <h2>Would you like a job on-campus or in the industry?</h2>
+            <input
+            type="text"
+            placeholder="Ex: On-campus"
+            value={formData.jobLocation}
+            onChange={(e) =>
+                setFormData({ ...formData, jobLocation: e.target.value })
+            }
+            className="name-input"
+            />
+        </>
+        )}
+
+        {step === 9 && (
+        <>
+            <h2>Are you looking for an internship or a full-time job?</h2>
+            <input
+            type="text"
+            placeholder="Ex: Internship"
             value={formData.jobType}
             onChange={(e) =>
-              setFormData({ ...formData, jobType: e.target.value })
+                setFormData({ ...formData, jobType: e.target.value })
             }
-          >
-            <option value="">Would you like a job on-campus or in the industry?</option>
-            <option value="on-campus">On-campus</option>
-            <option value="industry">Industry</option>
-          </select>
-          <select
-            value={formData.jobDuration}
-            onChange={(e) =>
-              setFormData({ ...formData, jobDuration: e.target.value })
-            }
-          >
-            <option value="">
-              Are you looking for a temporary job (ex. internship) or a long-term commitment?
-            </option>
-            <option value="temporary">Temporary (internship)</option>
-            <option value="long-term">Long-term</option>
-          </select>
-          <input
+            className="name-input"
+            />
+        </>
+        )}
+
+        {step === 10 && (
+        <>
+            <h2>Enter 7 keywords that best describe your interests</h2>
+            <input
             type="text"
-            placeholder="Please enter 7 keywords that best describe your interests"
+            placeholder="Ex: Front-end developer"
             value={formData.keywords}
             onChange={(e) =>
-              setFormData({ ...formData, keywords: e.target.value })
+                setFormData({ ...formData, keywords: e.target.value })
             }
-          />
-          <button onClick={handleNext} className="next-button">
-            Next →
-          </button>
-        </div>
-      )}
+            className="name-input"
+            />
+        </>
+        )}
 
-      {step === 4 && (
-        <div className="question-box">
-          <h2>About You</h2>
-          <textarea
-            placeholder="Provide 3 examples (one per line) of your top achievements (this can be anything and does not have to be school or career-based)"
-            value={formData.achievements}
-            onChange={(e) =>
-              setFormData({ ...formData, achievements: e.target.value })
-            }
-          />
-          <input
-            type="text"
-            placeholder="In one sentence describe what you like to do in your free time"
-            value={formData.freeTime}
-            onChange={(e) =>
-              setFormData({ ...formData, freeTime: e.target.value })
-            }
-          />
-          <textarea
-            placeholder="What inspired you to pursue a career in this field or pursue your concentration?"
-            value={formData.inspiration}
-            onChange={(e) =>
-              setFormData({ ...formData, inspiration: e.target.value })
-            }
-          />
-          <button className="submit-button">Submit</button>
-        </div>
-      )}
+        {step === 11 && (
+        <>
+            <h2>You're All Set!</h2>
+            <p className="subtext">Make sure to complete setting up your profile</p>
+            <button className="done-button">Done</button>
+        </>
+        )}
+
+
+        
+
+        <button
+          onClick={handleNext}
+          className="next-button"
+          style={{ visibility: step === 11? "hidden" : "visible" }}
+        >
+          Next →
+        </button>
+      </div>
     </div>
   );
 };
