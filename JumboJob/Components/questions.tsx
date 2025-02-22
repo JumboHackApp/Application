@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import { Dimensions } from "react-native";
+
+const { width, height } = Dimensions.get("window"); // Get screen size
 
 const Questions = () => {
   const [step, setStep] = useState(1);
@@ -161,15 +164,15 @@ const Questions = () => {
 
 const styles = StyleSheet.create({
   phoneContainer: {
-    width: 320,
-    height: 590,
+    width: width,
+    height: height,
     backgroundColor: "#1a1a1a",
     justifyContent: "center",
     alignItems: "center",
   },
   questionBox: {
-    width: 320,
-    height: 590,
+    width: width,
+    height: height,
     backgroundColor: "#d6e6f6",
     borderRadius: 20,
     padding: 30,
@@ -183,7 +186,7 @@ const styles = StyleSheet.create({
     color: "black",
     textAlign: "left",
     width: "90%",
-    marginBottom: 5,
+    marginBottom: 15,  // 👈 Add more space below the heading
   },
   subtext: {
     fontSize: 12,
@@ -191,6 +194,8 @@ const styles = StyleSheet.create({
     textAlign: "left",
     width: "90%",
     marginTop: -10,
+    marginBottom: 10,  // 👈 More space below subtext
+
   },
   input: {
     width: "90%",

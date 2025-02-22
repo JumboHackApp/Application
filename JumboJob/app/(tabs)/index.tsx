@@ -1,11 +1,12 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import Questions from "./Components/questions"; // Import Questions.tsx
+import Questions from "../../Components/questions"; // Import Questions.tsx
 
 export default function Index() {
   return (
     <View style={styles.container}>
-      <Questions />  {/* Load your Questions component */}
+      <Questions />  
+
     </View>
   );
 }
