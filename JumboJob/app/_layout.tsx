@@ -1,8 +1,11 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useSegments } from "expo-router";
+
 
 export default function RootLayout() {
   return (
+    
     <Tabs
       screenOptions={{
         headerShown: false, // 👈 Hides the top bar

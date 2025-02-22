@@ -1,9 +1,9 @@
 import { View, Text } from "react-native";
 
-export default function SavedScreen() {
+export default function PostEventScreen() {
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text>Saved Items</Text>
+      <Text>Create a New Event</Text>
     </View>
   );
 }
