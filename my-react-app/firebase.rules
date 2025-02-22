@@ -1,0 +1,20 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /profile-pictures/{userId} {
+      allow read: if true;
+      allow write: if {
+        let isAuthorized = request.auth != null && request.auth.uid == userId;
+        let isValidSize = request.resource.size <= 1 * 1024 * 1024;
+        let isValidType = request.resource.contentType.matches('image/(jpeg|png|webp)');
+        let hasValidMetadata = request.resource.metadata != null 
+          && request.resource.metadata.dimensions == "1024x1024";
+        
+        return isAuthorized 
+          && isValidSize 
+          && isValidType 
+          && hasValidMetadata;
+      }
+    }
+  }
+} 
