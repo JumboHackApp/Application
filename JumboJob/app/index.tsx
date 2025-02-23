@@ -5,7 +5,7 @@ import Questions from "../Components/questions"; // Import Questions.tsx
 export default function Index() {
   return (
     <View style={styles.container}>
-      <Questions />  
+      {/* <Questions />   */}
 
     </View>
   );
