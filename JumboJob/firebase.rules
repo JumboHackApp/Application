@@ -26,11 +26,35 @@ service firebase.storage {
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    match /jobs/{jobId} {
+      allow read, write: if request.auth != null;
+      
+      function validJobData() {
+        return request.resource.data.keys().hasAll(['jobTitle', 'company', 'location', 'workMode', 'employmentType', 'pay', 'description']) &&
+               request.resource.data.jobTitle is string && request.resource.data.jobTitle.size() <= 100 &&
+               request.resource.data.company is string && request.resource.data.company.size() <= 100 &&
+               request.resource.data.location is string && request.resource.data.location.size() <= 100 &&
+               request.resource.data.workMode in ['in person', 'remote', 'hybrid'] &&
+               request.resource.data.employmentType in ['full time', 'part time', 'internship'] &&
+               request.resource.data.pay is string && request.resource.data.pay.size() <= 50 &&
+               request.resource.data.description is string && request.resource.data.description.size() <= 1000;
+      }
+      
+      allow create: if validJobData();
+    }
+
     match /events/{eventId} {
-      allow write: if request.resource.data.description.size() <= 3000
-                   && request.resource.data.imageUrl is string
-                   && request.resource.data.createdAt is timestamp
-                   && request.resource.data.date is timestamp;
+      allow read, write: if request.auth != null;
+      
+      function validEventData() {
+        return request.resource.data.keys().hasAll(['name', 'location', 'time', 'imageLink']) &&
+               request.resource.data.name is string && request.resource.data.name.size() <= 100 &&
+               request.resource.data.location is string && request.resource.data.location.size() <= 100 &&
+               request.resource.data.time is timestamp &&
+               request.resource.data.imageLink is string && request.resource.data.imageLink.size() <= 200;
+      }
+      
+      allow create: if validEventData();
     }
   }
 } 

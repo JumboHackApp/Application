@@ -24,6 +24,7 @@ interface EventData {
   name: string;
   location: string;
   time: Date;
+  description: string;
   imageLink: string;
 }
 
@@ -79,7 +80,7 @@ const PostEvent: React.FC<PostEventProps> = ({ onCancel, onPostSuccess }) => {
   };
 
   const handlePost = async () => {
-    if (!image || !imageBlob || !name || !location) {
+    if (!image || !imageBlob || !name || !location || !description) {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
@@ -96,6 +97,7 @@ const PostEvent: React.FC<PostEventProps> = ({ onCancel, onPostSuccess }) => {
         name,
         location,
         time,
+        description,
         imageLink,
       });
 
@@ -103,6 +105,7 @@ const PostEvent: React.FC<PostEventProps> = ({ onCancel, onPostSuccess }) => {
       setImageBlob(null);
       setName("");
       setLocation("");
+      setDescription("");
       Alert.alert("Success", "Event posted successfully!");
       onPostSuccess();
     } catch (error) {
