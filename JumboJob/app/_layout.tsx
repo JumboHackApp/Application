@@ -59,6 +59,12 @@ export default function RootLayout() {
           href: null, // This will hide the tab
         }}
       />
+      <Tabs.Screen
+        name="JobSwipeApp"
+        options={{
+          href: null, // This will hide the tab
+        }}
+      />
     </Tabs>
   );
 }
