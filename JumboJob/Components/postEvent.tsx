@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from "react-native";
 import { storage, db } from "./firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { collection, addDoc } from "firebase/firestore";
 import * as ImagePicker from 'expo-image-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 const MAX_TEXT_LENGTH = 3000;
@@ -19,9 +20,20 @@ interface PostEventProps {
   onPostSuccess: () => void;
 }
 
+interface EventData {
+  name: string;
+  location: string;
+  time: Date;
+  imageLink: string;
+}
+
 const PostEvent: React.FC<PostEventProps> = ({ onCancel, onPostSuccess }) => {
   const [image, setImage] = useState<string | null>(null);
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
+  const [name, setName] = useState("");
+  const [location, setLocation] = useState("");
+  const [time, setTime] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [description, setDescription] = useState<string>("");
   const [uploading, setUploading] = useState(false);
 
@@ -67,36 +79,30 @@ const PostEvent: React.FC<PostEventProps> = ({ onCancel, onPostSuccess }) => {
   };
 
   const handlePost = async () => {
-    if (!image || !imageBlob || !description) {
-      Alert.alert("Error", "Please add both an image and description");
-      return;
-    }
-
-    if (description.length > MAX_TEXT_LENGTH) {
-      Alert.alert("Error", "Description must be less than 3000 characters");
+    if (!image || !imageBlob || !name || !location) {
+      Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
     try {
       setUploading(true);
-      
-      // Generate a simple filename with timestamp and random hash
       const fileName = `${Date.now()}-${generateRandomHash()}.jpg`;
       const storageRef = ref(storage, `events/${fileName}`);
       
       await uploadBytes(storageRef, imageBlob);
-      const downloadURL = await getDownloadURL(storageRef);
+      const imageLink = await getDownloadURL(storageRef);
 
       await addDoc(collection(db, "events"), {
-        imageUrl: downloadURL,
-        description: description,
-        createdAt: new Date(),
-        date: new Date(),
+        name,
+        location,
+        time,
+        imageLink,
       });
 
       setImage(null);
       setImageBlob(null);
-      setDescription("");
+      setName("");
+      setLocation("");
       Alert.alert("Success", "Event posted successfully!");
       onPostSuccess();
     } catch (error) {
@@ -108,53 +114,86 @@ const PostEvent: React.FC<PostEventProps> = ({ onCancel, onPostSuccess }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Post Your Event</Text>
+    <ScrollView style={styles.container}>
+      <View style={styles.content}>
+        <Text style={styles.title}>Post Your Event</Text>
 
-      {/* Image Upload Section */}
-      <TouchableOpacity 
-        style={[styles.imageUploadBox, { pointerEvents: uploading ? 'none' : 'auto' }]}
-        onPress={handleImageSelect}
-      >
-        {uploading ? (
-          <View style={styles.uploadPlaceholder}>
-            <Text>Uploading...</Text>
-          </View>
-        ) : image ? (
-          <Image source={{ uri: image }} style={styles.uploadedImage} />
-        ) : (
-          <View style={styles.uploadPlaceholder}>
-            <Ionicons name="image-outline" size={40} color="#666" />
-            <Text style={styles.uploadText}>Tap to upload from Photo Library</Text>
-          </View>
+        {/* Image Upload Section */}
+        <TouchableOpacity 
+          style={[styles.imageUploadBox, { pointerEvents: uploading ? 'none' : 'auto' }]}
+          onPress={handleImageSelect}
+        >
+          {uploading ? (
+            <View style={styles.uploadPlaceholder}>
+              <Text>Uploading...</Text>
+            </View>
+          ) : image ? (
+            <Image source={{ uri: image }} style={styles.uploadedImage} />
+          ) : (
+            <View style={styles.uploadPlaceholder}>
+              <Ionicons name="image-outline" size={40} color="#666" />
+              <Text style={styles.uploadText}>Tap to upload from Photo Library</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+
+        {/* Name and Location Inputs */}
+        <View style={styles.rowContainer}>
+          <TextInput
+            style={[styles.input, styles.halfInput]}
+            placeholder="Event Name"
+            value={name}
+            onChangeText={setName}
+          />
+          <TextInput
+            style={[styles.input, styles.halfInput]}
+            placeholder="Location"
+            value={location}
+            onChangeText={setLocation}
+          />
+        </View>
+
+        {/* Date/Time Selection */}
+        <TouchableOpacity 
+          style={styles.dateButton}
+          onPress={() => setShowDatePicker(true)}
+        >
+          <Text style={styles.dateButtonText}>
+            {time.toLocaleDateString()} at {time.toLocaleTimeString()}
+          </Text>
+        </TouchableOpacity>
+
+        {showDatePicker && (
+          <DateTimePicker
+            value={time}
+            mode="datetime"
+            onChange={(event, selectedDate) => {
+              setShowDatePicker(false);
+              if (selectedDate) setTime(selectedDate);
+            }}
+          />
         )}
-      </TouchableOpacity>
 
-      {/* Description Input */}
-      <TextInput
-        style={styles.eventDescription}
-        placeholder="Add Event Description"
-        value={description}
-        onChangeText={setDescription}
-        multiline
-      />
+        {/* Description Input */}
+        <TextInput
+          style={styles.eventDescription}
+          placeholder="Add Event Description"
+          value={description}
+          onChangeText={setDescription}
+          multiline
+        />
 
-      {/* Buttons */}
-      <View style={styles.buttonGroup}>
-        <TouchableOpacity 
-          style={styles.cancelButton}
-          onPress={onCancel}
-        >
-          <Text style={styles.buttonText}>Cancel</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.postButton} 
-          onPress={handlePost}
-        >
-          <Text style={[styles.buttonText, { color: 'white' }]}>Post</Text>
-        </TouchableOpacity>
+        {/* Buttons */}
+        <View style={styles.buttonGroup}>
+          <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
+            <Text style={styles.buttonText}>Cancel</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.postButton} onPress={handlePost}>
+            <Text style={[styles.buttonText, { color: 'white' }]}>Post</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -162,7 +201,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#d6e6f6",
-    paddingHorizontal: 20,
+  },
+  content: {
+    padding: 20,
     paddingTop: 60,
   },
   title: {
@@ -197,6 +238,23 @@ const styles = StyleSheet.create({
     height: '100%',
     resizeMode: 'cover',
   },
+  input: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 15,
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  dateButton: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 10,
+  },
+  dateButtonText: {
+    fontSize: 16,
+    color: '#333',
+  },
   eventDescription: {
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -226,6 +284,13 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 14,
     fontWeight: 'bold',
+  },
+  rowContainer: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  halfInput: {
+    flex: 1,
   },
 });
 
