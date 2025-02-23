@@ -99,20 +99,20 @@ const SwipeMain: React.FC = () => {
   };
 
   // Add keyboard event listener
-  useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent) => {
-      if (event.key === 'ArrowRight') {
-        forceSwipe('right');
-      } else if (event.key === 'ArrowLeft') {
-        forceSwipe('left');
-      }
-    };
+  // useEffect(() => {
+  //   const handleKeyPress = (event: KeyboardEvent) => {
+  //     if (event.key === 'ArrowRight') {
+  //       forceSwipe('right');
+  //     } else if (event.key === 'ArrowLeft') {
+  //       forceSwipe('left');
+  //     }
+  //   };
 
-    document.addEventListener('keydown', handleKeyPress);
-    return () => {
-      document.removeEventListener('keydown', handleKeyPress);
-    };
-  }, [currentIndex]); // Add currentIndex as dependency
+  //   document.addEventListener('keydown', handleKeyPress);
+  //   return () => {
+  //     document.removeEventListener('keydown', handleKeyPress);
+  //   };
+  // }, [currentIndex]); // Add currentIndex as dependency
 
   const renderCard = () => {
     if (currentIndex >= jobs.length) {
