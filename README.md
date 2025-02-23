@@ -60,21 +60,21 @@ HopOffer bridges the gap between **students and recruiters** by:
 
 #### 🚀 **David Oleksy** – Team Lead | AppFlow Architect
 💻 GitHub: [@therealupdiver](https://github.com/TheRealUPDiver)  
-📱 WhatsApp: [920-666-5656](tel:4143314306)  
+  
 
 #### 🎨 **Jasmine Kim** – Design
 💻 GitHub: [@jasminekim535](https://github.com/jasminekim535)  
-📱 WhatsApp: [347-721-7558](tel:3477217558)  
+ 
 
 #### 💻 **Eleanor Harty** – Back-End Developer | UI Integration
 🖥 GitHub: [@eharty01](https://github.com/eharty01)  
-📱 WhatsApp: [914-703-8540](tel:9147038540)  
+
 
 #### 💻 **Luca Byrnes** – Back-End Developer  
 🖥 GitHub: [@gbyrnes01](https://github.com/gbyrnes01)  
-📱 WhatsApp: [571-550-0301](tel:5715500301)  
+
 
 #### 🔧 **Javier Laveaga** – Front-End Developer  
 🖥 GitHub: [@javier-la200426](https://github.com/javier-la200426)  
-📱 WhatsApp: [202-744-6032](tel:2027446032)  
+
 
