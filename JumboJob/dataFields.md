@@ -5,6 +5,7 @@ Jobs:
     company: "",
     location:
     mode (like is it in person/remote/hybrid): "",
+    employmentType: "",
     pay: "",
     description: "",
 
@@ -18,7 +19,21 @@ Student:
     jobLocation: "",
     jobType: "",
     keywords: "",
+    image: ,
 
 Recruiter:
-    
-    
+    name: ":,
+    company: "",
+    Jobs: "",
+    image: ,
+
+Events:
+    name: "",
+    location: "",
+    time: "",
+    RSVP: href,
+    image: ,
+
+Posts:
+    image: ,
+    description: "",
