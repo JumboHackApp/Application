@@ -1,5 +1,7 @@
 # 🏆 HopOffer – Connecting Students with Recruiters Effortlessly
 
+![Splasher](https://github.com/user-attachments/assets/d88c1148-6ca4-4dd7-b399-43f3d267893f)
+
 ## 📌 Overview
 HopOffer is a **student-centric job application platform** that simplifies how college students connect with recruiters both on-campus and in industry. With a **modern design**, an intuitive **swipe-based job application system**, and seamless **authentication**, HopOffer streamlines the employment search process.
 
