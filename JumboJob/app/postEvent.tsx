@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import { storage, db } from "../firebase";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+// import { storage, db } from "../firebase";
+// import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { collection, addDoc } from "firebase/firestore";
 import * as ImagePicker from 'expo-image-picker';
 
@@ -60,45 +60,45 @@ const PostEvent: React.FC = () => {
     }
   };
 
-  const handlePost = async () => {
-    if (!image || !imageBlob || !description) {
-      Alert.alert("Error", "Please add both an image and description");
-      return;
-    }
+  // const handlePost = async () => {
+  //   if (!image || !imageBlob || !description) {
+  //     Alert.alert("Error", "Please add both an image and description");
+  //     return;
+  //   }
 
-    if (description.length > MAX_TEXT_LENGTH) {
-      Alert.alert("Error", "Description must be less than 3000 characters");
-      return;
-    }
+  //   if (description.length > MAX_TEXT_LENGTH) {
+  //     Alert.alert("Error", "Description must be less than 3000 characters");
+  //     return;
+  //   }
 
-    try {
-      setUploading(true);
+  //   try {
+  //     setUploading(true);
       
-      // Generate a simple filename with timestamp and random hash
-      const fileName = `${Date.now()}-${generateRandomHash()}.jpg`;
-      const storageRef = ref(storage, `events/${fileName}`);
+  //     // Generate a simple filename with timestamp and random hash
+  //     const fileName = `${Date.now()}-${generateRandomHash()}.jpg`;
+  //     const storageRef = ref(storage, `events/${fileName}`);
       
-      await uploadBytes(storageRef, imageBlob);
-      const downloadURL = await getDownloadURL(storageRef);
+  //     await uploadBytes(storageRef, imageBlob);
+  //     const downloadURL = await getDownloadURL(storageRef);
 
-      await addDoc(collection(db, "events"), {
-        imageUrl: downloadURL,
-        description: description,
-        createdAt: new Date(),
-        date: new Date(),
-      });
+  //     await addDoc(collection(db, "events"), {
+  //       imageUrl: downloadURL,
+  //       description: description,
+  //       createdAt: new Date(),
+  //       date: new Date(),
+  //     });
 
-      setImage(null);
-      setImageBlob(null);
-      setDescription("");
-      Alert.alert("Success", "Event posted successfully!");
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Error", "Failed to post event");
-    } finally {
-      setUploading(false);
-    }
-  };
+  //     setImage(null);
+  //     setImageBlob(null);
+  //     setDescription("");
+  //     Alert.alert("Success", "Event posted successfully!");
+  //   } catch (error) {
+  //     console.error(error);
+  //     Alert.alert("Error", "Failed to post event");
+  //   } finally {
+  //     setUploading(false);
+  //   }
+  // };
 
   return (
     <View style={styles.postEventContainer}>
@@ -139,7 +139,7 @@ const PostEvent: React.FC = () => {
         </TouchableOpacity>
         <TouchableOpacity 
           style={styles.postButton} 
-          onPress={handlePost}
+          //onPress={handlePost}
         >
           <Text style={[styles.buttonText, { color: 'white' }]}>Post</Text>
         </TouchableOpacity>

@@ -2,10 +2,8 @@ import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSegments } from "expo-router";
 
-
 export default function RootLayout() {
   return (
-    
     <Tabs
       screenOptions={{
         headerShown: false, // 👈 Hides the top bar
@@ -52,6 +50,13 @@ export default function RootLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person-outline" size={size} color={color} />
           ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="postEvent"
+        options={{
+          href: null, // This will hide the tab
         }}
       />
     </Tabs>

@@ -7,7 +7,6 @@ import {
   FlatList,
   Image,
 } from "react-native";
-import { useRouter } from "expo-router";
 
 
 
@@ -77,7 +76,6 @@ const savedEvents = [
 ];
 
 export default function SavedScreen() {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState("Jobs");
 
   return (
@@ -180,13 +178,6 @@ export default function SavedScreen() {
           )}
         />
       )}
-
-      <TouchableOpacity
-        style={styles.postButton}
-        onPress={() => router.push("/postEvent")}
-      >
-        <Text style={styles.postButtonText}>Post Your Event +</Text>
-      </TouchableOpacity>
     </View>
   );
 }
