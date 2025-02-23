@@ -1,11 +1,14 @@
 import React from "react";
+import { useState } from "react";
 import { View, StyleSheet } from "react-native";
 import SwipeMain from "../Components/swipeMain"; // Import Questions.tsx
 
 export default function Index() {
+  const [savedJobs, setSavedJobs] = useState<Job[]>([]); // Store saved jobs
+
   return (
     <View style={styles.container}>
-      <SwipeMain />  
+      <SwipeMain setSavedJobs={setSavedJobs} />  
     </View>
   );
 }
