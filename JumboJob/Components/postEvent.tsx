@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
-// import { storage, db } from "../firebase";
-// import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage, db } from "./firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { collection, addDoc } from "firebase/firestore";
 import * as ImagePicker from 'expo-image-picker';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 const MAX_TEXT_LENGTH = 3000;
 const MAX_IMAGE_SIZE = 1024 * 1024; // 1MB in bytes
@@ -13,7 +14,12 @@ const generateRandomHash = () => {
          Math.random().toString(36).substring(2, 15);
 };
 
-const PostEvent: React.FC = () => {
+interface PostEventProps {
+  onCancel: () => void;
+  onPostSuccess: () => void;
+}
+
+const PostEvent: React.FC<PostEventProps> = ({ onCancel, onPostSuccess }) => {
   const [image, setImage] = useState<string | null>(null);
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
   const [description, setDescription] = useState<string>("");
@@ -60,48 +66,49 @@ const PostEvent: React.FC = () => {
     }
   };
 
-  // const handlePost = async () => {
-  //   if (!image || !imageBlob || !description) {
-  //     Alert.alert("Error", "Please add both an image and description");
-  //     return;
-  //   }
+  const handlePost = async () => {
+    if (!image || !imageBlob || !description) {
+      Alert.alert("Error", "Please add both an image and description");
+      return;
+    }
 
-  //   if (description.length > MAX_TEXT_LENGTH) {
-  //     Alert.alert("Error", "Description must be less than 3000 characters");
-  //     return;
-  //   }
+    if (description.length > MAX_TEXT_LENGTH) {
+      Alert.alert("Error", "Description must be less than 3000 characters");
+      return;
+    }
 
-  //   try {
-  //     setUploading(true);
+    try {
+      setUploading(true);
       
-  //     // Generate a simple filename with timestamp and random hash
-  //     const fileName = `${Date.now()}-${generateRandomHash()}.jpg`;
-  //     const storageRef = ref(storage, `events/${fileName}`);
+      // Generate a simple filename with timestamp and random hash
+      const fileName = `${Date.now()}-${generateRandomHash()}.jpg`;
+      const storageRef = ref(storage, `events/${fileName}`);
       
-  //     await uploadBytes(storageRef, imageBlob);
-  //     const downloadURL = await getDownloadURL(storageRef);
+      await uploadBytes(storageRef, imageBlob);
+      const downloadURL = await getDownloadURL(storageRef);
 
-  //     await addDoc(collection(db, "events"), {
-  //       imageUrl: downloadURL,
-  //       description: description,
-  //       createdAt: new Date(),
-  //       date: new Date(),
-  //     });
+      await addDoc(collection(db, "events"), {
+        imageUrl: downloadURL,
+        description: description,
+        createdAt: new Date(),
+        date: new Date(),
+      });
 
-  //     setImage(null);
-  //     setImageBlob(null);
-  //     setDescription("");
-  //     Alert.alert("Success", "Event posted successfully!");
-  //   } catch (error) {
-  //     console.error(error);
-  //     Alert.alert("Error", "Failed to post event");
-  //   } finally {
-  //     setUploading(false);
-  //   }
-  // };
+      setImage(null);
+      setImageBlob(null);
+      setDescription("");
+      Alert.alert("Success", "Event posted successfully!");
+      onPostSuccess();
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Error", "Failed to post event");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
-    <View style={styles.postEventContainer}>
+    <View style={styles.container}>
       <Text style={styles.title}>Post Your Event</Text>
 
       {/* Image Upload Section */}
@@ -117,7 +124,7 @@ const PostEvent: React.FC = () => {
           <Image source={{ uri: image }} style={styles.uploadedImage} />
         ) : (
           <View style={styles.uploadPlaceholder}>
-            <Text style={styles.plusIcon}>+</Text>
+            <Ionicons name="image-outline" size={40} color="#666" />
             <Text style={styles.uploadText}>Tap to upload from Photo Library</Text>
           </View>
         )}
@@ -134,12 +141,15 @@ const PostEvent: React.FC = () => {
 
       {/* Buttons */}
       <View style={styles.buttonGroup}>
-        <TouchableOpacity style={styles.cancelButton}>
+        <TouchableOpacity 
+          style={styles.cancelButton}
+          onPress={onCancel}
+        >
           <Text style={styles.buttonText}>Cancel</Text>
         </TouchableOpacity>
         <TouchableOpacity 
           style={styles.postButton} 
-          //onPress={handlePost}
+          onPress={handlePost}
         >
           <Text style={[styles.buttonText, { color: 'white' }]}>Post</Text>
         </TouchableOpacity>
@@ -149,53 +159,37 @@ const PostEvent: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  postEventContainer: {
-    width: '90%',
-    alignSelf: 'center',
+  container: {
     flex: 1,
-    marginVertical: '5%',
-    padding: '5%',
-    backgroundColor: '#e5f0ff',
-    borderRadius: 10,
-    alignItems: 'center',
+    backgroundColor: "#d6e6f6",
+    paddingHorizontal: 20,
+    paddingTop: 60,
   },
   title: {
-    color: '#222',
-    fontSize: 18,
-    fontWeight: 'bold',
-    alignSelf: 'flex-start',
-    marginBottom: '4%',
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#000",
+    marginBottom: 20,
   },
   imageUploadBox: {
     width: '100%',
     aspectRatio: 21/9,
     maxHeight: '40%',
-    borderWidth: 2,
-    borderColor: '#cbe2ff',
-    borderRadius: 10,
-    backgroundColor: '#eef6ff',
+    backgroundColor: '#fff',
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
+    marginBottom: 20,
   },
   uploadPlaceholder: {
     alignItems: 'center',
-    padding: '4%',
-  },
-  plusIcon: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    borderWidth: 2,
-    borderColor: 'black',
-    borderRadius: 25,
-    width: '12%',
-    aspectRatio: 1,
-    textAlign: 'center',
-    textAlignVertical: 'center',
-    marginBottom: '2%',
+    justifyContent: 'center',
+    gap: 10,
   },
   uploadText: {
     fontSize: 14,
+    color: '#666',
     textAlign: 'center',
   },
   uploadedImage: {
@@ -204,38 +198,34 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
   eventDescription: {
-    width: '100%',
-    minHeight: 100,
-    marginTop: '4%',
-    padding: '2.5%',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    fontSize: 14,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 15,
+    minHeight: 120,
+    fontSize: 16,
+    textAlignVertical: 'top',
   },
   buttonGroup: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    width: '100%',
-    marginTop: '4%',
+    marginTop: 20,
+    gap: 10,
+  },
+  cancelButton: {
+    backgroundColor: '#fff',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+  },
+  postButton: {
+    backgroundColor: '#1a1a1a',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
   },
   buttonText: {
     fontSize: 14,
-  },
-  cancelButton: {
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    paddingVertical: '2%',
-    paddingHorizontal: '4%',
-    borderRadius: 20,
-    marginRight: '2.5%',
-  },
-  postButton: {
-    backgroundColor: '#1e3a8a',
-    paddingVertical: '2%',
-    paddingHorizontal: '4%',
-    borderRadius: 20,
+    fontWeight: 'bold',
   },
 });
 

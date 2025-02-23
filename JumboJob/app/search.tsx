@@ -1,15 +1,28 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
+import PostEvent from "../Components/postEvent";
 
-const jobsData = [
+interface Job {
+  id: string;
+  title: string;
+  company: string;
+}
+
+interface Event {
+  id: string;
+  title: string;
+  location: string;
+}
+
+const jobsData: Job[] = [
   { id: "1", title: "Software Engineer Intern", company: "Google" },
   { id: "2", title: "Data Analyst", company: "Facebook" },
   { id: "3", title: "UI/UX Designer", company: "Apple" },
   { id: "4", title: "Machine Learning Engineer", company: "Tesla" },
 ];
 
-const eventsData = [
+const eventsData: Event[] = [
   { id: "1", title: "Hackathon 2025", location: "Boston, MA" },
   { id: "2", title: "AI & Robotics Conference", location: "San Francisco, CA" },
   { id: "3", title: "Startups Networking", location: "New York, NY" },
@@ -20,12 +33,24 @@ export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState(["Bio Fabrication", "UI/UX"]);
   const [activeTab, setActiveTab] = useState("Jobs");
+  const [showPostEvent, setShowPostEvent] = useState(false);
 
   const filteredResults = (activeTab === "Jobs" ? jobsData : eventsData).filter((item) =>
     item.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
   const router = useRouter();
   
+  const handleShowPostEvent = () => setShowPostEvent(true);
+  const handleHidePostEvent = () => setShowPostEvent(false);
+
+  if (showPostEvent) {
+    return (
+      <PostEvent 
+        onCancel={handleHidePostEvent}
+        onPostSuccess={handleHidePostEvent}
+      />
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -87,18 +112,22 @@ export default function SearchScreen() {
           <View style={styles.resultItem}>
             <Text style={styles.resultTitle}>{item.title}</Text>
             <Text style={styles.resultSubtitle}>
-              {activeTab === "Jobs" ? `Company: ${item.company}` : `Location: ${item.location}`}
+              {activeTab === "Jobs" 
+                ? `Company: ${(item as Job).company}` 
+                : `Location: ${(item as Event).location}`}
             </Text>
           </View>
         )}
       />
 
-      <TouchableOpacity
-              style={styles.postButton}
-              onPress={() => router.push("/postEvent")}
-            >
-              <Text style={styles.postButtonText}>Post Your Event +</Text>
-            </TouchableOpacity>
+      {activeTab === "Events" && (
+        <TouchableOpacity
+          style={styles.postButton}
+          onPress={handleShowPostEvent}
+        >
+          <Text style={styles.postButtonText}>Post Your Event +</Text>
+        </TouchableOpacity>
+      )}
     </View>
     
   );
