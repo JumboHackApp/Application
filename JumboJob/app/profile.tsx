@@ -19,6 +19,7 @@ export default function ProfileScreen() {
   });
 
   const [modalVisible, setModalVisible] = useState(false);
+  const [editVisible, setEditVisible] = useState(false);
   const [resumeModalVisible, setResumeModalVisible] = useState(false);
   const [currentField, setCurrentField] = useState("");
   const [resumeCategory, setResumeCategory] = useState("");
@@ -56,6 +57,25 @@ export default function ProfileScreen() {
   const saveResumeEntries = () => {
     setResumeModalVisible(false);
   };
+  
+  //added
+  const [profileData, setProfileData] = useState({
+    location: "Medford, Massachusetts, United States",
+    fullName: "John Doe",
+    schoolEmail: "john.doe@tufts.edu",
+    phoneNumber: "+1 123-456-7890",
+    h1bStatus: "No",
+    gender: "Female",
+    race: "Asian",
+    veteranStatus: "No",
+    disabilityStatus: "No",
+    graduationYear: "2027",
+    school: "Tufts University",
+  });
+  //added
+  const handleInputChange = (field, value) => {
+    setProfileData({ ...profileData, [field]: value });
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -67,10 +87,55 @@ export default function ProfileScreen() {
           <Ionicons name="location-outline" size={16} color="#fff" />
           <Text style={styles.locationText}>Medford, MA</Text>
         </View>
-        <TouchableOpacity style={styles.editButton}>
+        <TouchableOpacity style={styles.editButton} onPress={() => setEditVisible(true)}>
           <Text style={styles.editButtonText}>Edit Profile</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Edit Profile Modal */}
+      <Modal visible={editVisible} animationType="fade" transparent>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Personal</Text>
+
+            <ScrollView>
+              {Object.keys(profileData).map((field, index) => (
+                <View key={index} style={styles.inputContainer}>
+                  <Text style={styles.label}>
+                    {field.replace(/([A-Z])/g, " $1").trim()}
+                  </Text>
+                  <View style={styles.inputRow}>
+                    <TextInput
+                      style={styles.input}
+                      value={profileData[field]}
+                      onChangeText={(text) => handleInputChange(field, text)}
+                    />
+                    <TouchableOpacity>
+                      <Ionicons name="create-outline" size={18} color="#666" />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+
+            {/* Buttons */}
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setEditVisible(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.doneButton}
+                onPress={() => setEditVisible(false)}
+              >
+                <Text style={styles.doneButtonText}>Done</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* About Section */}
       <View style={styles.card}>
@@ -93,7 +158,9 @@ export default function ProfileScreen() {
             <Text
               style={[
                 styles.inputText,
-                aboutData[field] ? styles.filledInputText : styles.placeholderText,
+                aboutData[field]
+                  ? styles.filledInputText
+                  : styles.placeholderText,
               ]}
             >
               {aboutData[field] || "No details added"}
@@ -170,7 +237,10 @@ export default function ProfileScreen() {
                 <Text style={styles.savedResumeEntry}>• {item}</Text>
               )}
             />
-            <TouchableOpacity style={styles.saveButton} onPress={saveResumeEntries}>
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={saveResumeEntries}
+            >
               <Text style={styles.saveButtonText}>Save</Text>
             </TouchableOpacity>
           </View>
@@ -184,6 +254,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#d6e6f6",
+   
   },
   header: {
     backgroundColor: "#2E4A7B",
@@ -298,5 +369,44 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#fff",
     marginLeft: 5,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 15,
+  },
+  cancelButton: {
+    padding: 10,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: "#999",
+  },
+  cancelButtonText: {
+    color: "#333",
+    fontSize: 14,
+  },
+  doneButton: {
+    backgroundColor: "#4B6EA9",
+    padding: 10,
+    borderRadius: 5,
+  },
+  doneButtonText: {
+    color: "#fff",
+    fontSize: 14,
+  },
+  
+  inputContainer: {
+    marginBottom: 10,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 3,
+  },
+  input: {
+    flex: 1,
+    fontSize: 14,
+    color: "#333",
   },
 });
