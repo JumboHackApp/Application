@@ -1,7 +1,7 @@
 # 🏆 HopOffer – Connecting Students with Recruiters Effortlessly
 
 ## 📌 Overview
-JumboApp is a **student-centric job application platform** that simplifies how college students connect with recruiters both on-campus and in industry. With a **modern design**, an intuitive **swipe-based job application system**, and seamless **authentication**, JumboApp streamlines the employment search process.
+HopOffer is a **student-centric job application platform** that simplifies how college students connect with recruiters both on-campus and in industry. With a **modern design**, an intuitive **swipe-based job application system**, and seamless **authentication**, JumboApp streamlines the employment search process.
 
 > 🚀 Built for JumboHack 2025
 
@@ -22,7 +22,7 @@ As college students, we recognize the **difficulty of standing out** in oversatu
 ---
 
 ## 💡 Solution
-JumboApp bridges the gap between **students and recruiters** by:
+HopOffer bridges the gap between **students and recruiters** by:
 - ✅ **Providing a Tinder-like job-matching system**
 - ✅ **Allowing students to swipe right to apply, left to pass**
 - ✅ **Creating personalized student profiles showcasing majors, skills, and experience**
