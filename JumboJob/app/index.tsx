@@ -1,11 +1,11 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import Questions from "../Components/questions"; // Import Questions.tsx
+import SwipeMain from "../Components/swipeMain"; // Import Questions.tsx
 
 export default function Index() {
   return (
     <View style={styles.container}>
-      <Questions />  
+      <SwipeMain />  
     </View>
   );
 }
@@ -15,6 +15,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#1a1a1a",
+    backgroundColor: "#d6e6f6",
   },
 });
