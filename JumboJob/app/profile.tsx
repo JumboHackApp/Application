@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Modal,
+  FlatList,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function ProfileScreen() {
@@ -9,6 +18,45 @@ export default function ProfileScreen() {
     careerInspiration: "",
   });
 
+  const [modalVisible, setModalVisible] = useState(false);
+  const [resumeModalVisible, setResumeModalVisible] = useState(false);
+  const [currentField, setCurrentField] = useState("");
+  const [resumeCategory, setResumeCategory] = useState("");
+  const [resumeInput, setResumeInput] = useState("");
+  const [resumeEntries, setResumeEntries] = useState({
+    Experiences: [],
+    Projects: [],
+    Skills: [],
+    Languages: [],
+    Certifications: [],
+    Awards: [],
+  });
+
+  const openEditModal = (field) => {
+    setCurrentField(field);
+    setModalVisible(true);
+  };
+
+  const openResumeModal = (category) => {
+    setResumeCategory(category);
+    setResumeModalVisible(true);
+    setResumeInput(""); // Reset input
+  };
+
+  const addResumeEntry = () => {
+    if (resumeInput.trim()) {
+      setResumeEntries((prev) => ({
+        ...prev,
+        [resumeCategory]: [...prev[resumeCategory], resumeInput.trim()],
+      }));
+      setResumeInput("");
+    }
+  };
+
+  const saveResumeEntries = () => {
+    setResumeModalVisible(false);
+  };
+
   return (
     <ScrollView style={styles.container}>
       {/* Header Section */}
@@ -16,7 +64,7 @@ export default function ProfileScreen() {
         <View style={styles.profilePic} />
         <Text style={styles.name}>Your Name</Text>
         <View style={styles.locationContainer}>
-          <Ionicons name="location-outline" size={16} color="#333" />
+          <Ionicons name="location-outline" size={16} color="#fff" />
           <Text style={styles.locationText}>Medford, MA</Text>
         </View>
         <TouchableOpacity style={styles.editButton}>
@@ -27,41 +75,107 @@ export default function ProfileScreen() {
       {/* About Section */}
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>About</Text>
-        <Text style={styles.description}>
-          Provide 3 examples (one-line each) of your top achievements (this can be anything and does not have to be school or career-based).
-        </Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter achievements..."
-          value={aboutData.achievements}
-          onChangeText={(text) => setAboutData({ ...aboutData, achievements: text })}
-        />
 
-        <TextInput
-          style={styles.input}
-          placeholder="In one sentence, describe what you like to do in your free time."
-          value={aboutData.freeTime}
-          onChangeText={(text) => setAboutData({ ...aboutData, freeTime: text })}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="What inspired you to pursue this field?"
-          value={aboutData.careerInspiration}
-          onChangeText={(text) => setAboutData({ ...aboutData, careerInspiration: text })}
-        />
+        {Object.keys(aboutData).map((field, index) => (
+          <View key={index}>
+            <View style={styles.inputRow}>
+              <Text style={styles.description}>
+                {field === "achievements"
+                  ? "Top Achievements"
+                  : field === "freeTime"
+                  ? "What You Like to Do"
+                  : "Career Inspiration"}
+              </Text>
+              <TouchableOpacity onPress={() => openEditModal(field)}>
+                <Ionicons name="create-outline" size={18} color="#666" />
+              </TouchableOpacity>
+            </View>
+            <Text
+              style={[
+                styles.inputText,
+                aboutData[field] ? styles.filledInputText : styles.placeholderText,
+              ]}
+            >
+              {aboutData[field] || "No details added"}
+            </Text>
+          </View>
+        ))}
       </View>
 
       {/* Resume Section */}
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Resume</Text>
-        {["Experiences", "Projects", "Skills", "Languages", "Certifications", "Awards"].map((item, index) => (
-          <TouchableOpacity key={index} style={styles.resumeItem}>
-            <Text style={styles.resumeText}>{item}</Text>
-            <Ionicons name="add-outline" size={20} color="black" />
-          </TouchableOpacity>
+        {Object.keys(resumeEntries).map((category, index) => (
+          <View key={index}>
+            <TouchableOpacity
+              style={styles.resumeItem}
+              onPress={() => openResumeModal(category)}
+            >
+              <Text style={styles.resumeText}>{category}</Text>
+              <Ionicons name="add-outline" size={20} color="black" />
+            </TouchableOpacity>
+
+            {/* Display saved resume entries */}
+            <FlatList
+              data={resumeEntries[category]}
+              keyExtractor={(item, idx) => idx.toString()}
+              renderItem={({ item }) => (
+                <Text style={styles.savedResumeEntry}>• {item}</Text>
+              )}
+            />
+          </View>
         ))}
       </View>
+
+      {/* About Edit Modal */}
+      <Modal visible={modalVisible} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Edit {currentField}</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Enter details..."
+              multiline
+              value={aboutData[currentField]}
+              onChangeText={(text) =>
+                setAboutData({ ...aboutData, [currentField]: text })
+              }
+            />
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.saveButtonText}>Save</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Resume Edit Modal */}
+      <Modal visible={resumeModalVisible} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Add {resumeCategory}</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder={`Enter ${resumeCategory} details...`}
+              value={resumeInput}
+              onChangeText={setResumeInput}
+              onSubmitEditing={addResumeEntry} // Press Enter to add
+            />
+            <FlatList
+              data={resumeEntries[resumeCategory]}
+              keyExtractor={(item, idx) => idx.toString()}
+              renderItem={({ item }) => (
+                <Text style={styles.savedResumeEntry}>• {item}</Text>
+              )}
+            />
+            <TouchableOpacity style={styles.saveButton} onPress={saveResumeEntries}>
+              <Text style={styles.saveButtonText}>Save</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -89,15 +203,78 @@ const styles = StyleSheet.create({
     color: "#fff",
     marginTop: 10,
   },
-  locationContainer: {
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 15,
+    marginHorizontal: 15,
+    marginTop: 15,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  inputRow: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 5,
+  },
+  inputText: {
+    fontSize: 14,
+    marginBottom: 10,
+  },
+  placeholderText: {
+    color: "#999",
+  },
+  filledInputText: {
+    color: "#333",
+    fontWeight: "bold",
+  },
+  resumeItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+  },
+  savedResumeEntry: {
+    color: "#1E4D90",
+    fontWeight: "bold",
     marginTop: 5,
   },
-  locationText: {
-    fontSize: 14,
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalBox: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    width: "80%",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  modalInput: {
+    borderBottomWidth: 1,
+    paddingVertical: 5,
+    fontSize: 16,
+  },
+  saveButton: {
+    marginTop: 15,
+    backgroundColor: "#4B6EA9",
+    padding: 10,
+    borderRadius: 5,
+  },
+  saveButtonText: {
     color: "#fff",
-    marginLeft: 5,
+    textAlign: "center",
   },
   editButton: {
     backgroundColor: "#4B6EA9",
@@ -111,42 +288,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
   },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 15,
-    marginHorizontal: 15,
-    marginTop: 15,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#000",
-    marginBottom: 10,
-  },
-  description: {
-    fontSize: 12,
-    color: "#666",
-    marginBottom: 10,
-  },
-  input: {
-    backgroundColor: "#f5f5f5",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 10,
-    fontSize: 14,
-    color: "#333",
-  },
-  resumeItem: {
+
+  locationContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
+    alignItems: "center",
+    marginTop: 5,
   },
-  resumeText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#000",
+  locationText: {
+    fontSize: 14,
+    color: "#fff",
+    marginLeft: 5,
   },
 });
