@@ -6,7 +6,6 @@ export default function Index() {
   return (
     <View style={styles.container}>
       <Questions />  
-
     </View>
   );
 }
