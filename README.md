@@ -60,8 +60,12 @@ HopOffer bridges the gap between **students and recruiters** by:
 
 #### 🚀 **David Oleksy** – Team Lead | AppFlow Architect
 💻 GitHub: [@therealupdiver](https://github.com/TheRealUPDiver)  
-  
 
+
+#### 🔧 **Javier Laveaga** – Full-Stack Developer  
+🖥 GitHub: [@javier-la200426](https://github.com/javier-la200426)  
+
+  
 #### 🎨 **Jasmine Kim** – Design
 💻 GitHub: [@jasminekim535](https://github.com/jasminekim535)  
  
@@ -72,9 +76,5 @@ HopOffer bridges the gap between **students and recruiters** by:
 
 #### 💻 **Luca Byrnes** – Back-End Developer  
 🖥 GitHub: [@gbyrnes01](https://github.com/gbyrnes01)  
-
-
-#### 🔧 **Javier Laveaga** – Front-End Developer  
-🖥 GitHub: [@javier-la200426](https://github.com/javier-la200426)  
 
 
