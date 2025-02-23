@@ -4,6 +4,8 @@ import { useRouter } from "expo-router";
 import PostEvent from "../Components/postEvent";
 import { collection, getDocs, query, limit } from 'firebase/firestore';
 import { db } from '../Components/firebase';
+import { where, orderBy, startAt, endAt } from 'firebase/firestore';
+
 
 interface Job {
   id: string;
@@ -35,29 +37,48 @@ export default function SearchScreen() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
 
+
   useEffect(() => {
     const fetchData = async () => {
-      if (activeTab === "Jobs") {
-        const jobsQuery = query(collection(db, 'jobs'), limit(40));
-        const jobsSnapshot = await getDocs(jobsQuery);
-        const jobsList = jobsSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        } as Job));
-        setJobs(jobsList);
+      if (!searchQuery.trim()) {
+        // If search query is empty, fetch all jobs/events
+        if (activeTab === "Jobs") {
+          const jobsQuery = query(collection(db, 'jobs'), limit(40));
+          const jobsSnapshot = await getDocs(jobsQuery);
+          setJobs(jobsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Job)));
+        } else {
+          const eventsQuery = query(collection(db, 'events'), limit(40));
+          const eventsSnapshot = await getDocs(eventsQuery);
+          setEvents(eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Event)));
+        }
       } else {
-        const eventsQuery = query(collection(db, 'events'), limit(40));
-        const eventsSnapshot = await getDocs(eventsQuery);
-        const eventsList = eventsSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        } as Event));
-        setEvents(eventsList);
+        // Use Firestore queries to fetch matching data
+        if (activeTab === "Jobs") {
+          const jobsQuery = query(
+            collection(db, 'jobs'),
+            orderBy('jobTitle'), // Firestore requires an index for `orderBy`
+            startAt(searchQuery),
+            endAt(searchQuery + '\uf8ff'),
+            limit(40)
+          );
+          const jobsSnapshot = await getDocs(jobsQuery);
+          setJobs(jobsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Job)));
+        } else {
+          const eventsQuery = query(
+            collection(db, 'events'),
+            orderBy('name'),
+            startAt(searchQuery),
+            endAt(searchQuery + '\uf8ff'),
+            limit(40)
+          );
+          const eventsSnapshot = await getDocs(eventsQuery);
+          setEvents(eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Event)));
+        }
       }
     };
 
     fetchData();
-  }, [activeTab]);
+}, [activeTab, searchQuery]); // Fetch when `searchQuery` changes
 
   const filteredResults = activeTab === "Jobs" 
     ? jobs.filter(job => job.jobTitle.toLowerCase().includes(searchQuery.toLowerCase()))

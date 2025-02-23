@@ -5,78 +5,19 @@ import {
   TouchableOpacity,
   StyleSheet,
   FlatList,
-  Image,
 } from "react-native";
-
-
-
-
 import { Ionicons } from "@expo/vector-icons";
-
-// Sample job listings
-const savedJobs = [
-  {
-    id: "1",
-    title: "Biofabrication Intern",
-    description: "3D Printing | Biology | 3D Modeling",
-    status: "Applied",
-    bookmarked: true,
-  },
-  {
-    id: "2",
-    title: "PayPal Intern",
-    description: "Front-end Web Dev Software Design",
-    status: "Applied",
-    bookmarked: true,
-    selected: true, // Blue border for selection
-  },
-  {
-    id: "3",
-    title: "CHOB Lab Technician",
-    description: "Data Collection Python | C#",
-    status: "Applied",
-    bookmarked: true,
-  },
-  {
-    id: "4",
-    title: "SEM Imaging Technician",
-    description: "Confocal neural imaging",
-    status: "Apply",
-    bookmarked: true,
-    apply: true, // Special Apply button color
-  },
-];
-
-// Sample event listings
-const savedEvents = [
-  {
-    id: "1",
-    title: "Jumbo Hack",
-    date: "Feb 22-23",
-    // image: require("../assets/jumbohack.png"), // Replace with actual image path
-  },
-  {
-    id: "2",
-    title: "Hacking Injustice",
-    date: "March 1 - March 2, 2025",
-    // image: require("../assets/hacking_injustice.png"),
-  },
-  {
-    id: "3",
-    title: "Harvard Rare Disease Hackathon",
-    date: "2025",
-    // image: require("../assets/harvard_hackathon.png"),
-  },
-  {
-    id: "4",
-    title: "Paid Study - fMRI on Social Experiences",
-    date: "Ongoing",
-    // image: require("../assets/paid_study.png"),
-  },
-];
+import { useSavedJobs } from "../context/SavedJobsContext"; // Import global state
 
 export default function SavedScreen() {
   const [activeTab, setActiveTab] = useState("Jobs");
+  const { savedJobs } = useSavedJobs(); // Get saved jobs from context
+
+  const renderTag = (text: string, color: string, key: string) => (
+    <View key={key} style={[styles.tag, { backgroundColor: color }]}>
+      <Text style={styles.tagText}>{text}</Text>
+    </View>
+  );
 
   return (
     <View style={styles.container}>
@@ -84,24 +25,6 @@ export default function SavedScreen() {
 
       {/* Toggle Button */}
       <View style={styles.toggleContainer}>
-        <TouchableOpacity
-          style={[
-            styles.toggleButton,
-            activeTab === "Events"
-              ? styles.activeToggle
-              : styles.inactiveToggle,
-          ]}
-          onPress={() => setActiveTab("Events")}
-        >
-          <Text
-            style={[
-              styles.toggleText,
-              activeTab === "Events" ? styles.activeText : styles.inactiveText,
-            ]}
-          >
-            Events
-          </Text>
-        </TouchableOpacity>
         <TouchableOpacity
           style={[
             styles.toggleButton,
@@ -118,65 +41,61 @@ export default function SavedScreen() {
             Jobs
           </Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.toggleButton,
+            activeTab === "Events" ? styles.activeToggle : styles.inactiveToggle,
+          ]}
+          onPress={() => setActiveTab("Events")}
+        >
+          <Text
+            style={[
+              styles.toggleText,
+              activeTab === "Events" ? styles.activeText : styles.inactiveText,
+            ]}
+          >
+            Events
+          </Text>
+        </TouchableOpacity>
       </View>
 
-      {/* Force re-render by changing key */}
+      {/* Job List */}
       {activeTab === "Jobs" ? (
-        <FlatList
-          key="jobs" // Forces re-render when switching tabs
-          data={savedJobs}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={[styles.jobCard, item.selected && styles.selectedJob]}>
-              <View style={styles.jobInfo}>
-                <Text style={styles.jobTitle}>{item.title}</Text>
-                <Text style={styles.jobDescription}>{item.description}</Text>
-              </View>
+        savedJobs.length === 0 ? (
+          <Text style={styles.noJobsText}>No saved jobs yet.</Text>
+        ) : (
+          <FlatList
+            key="jobs" // Forces re-render when switching tabs
+            data={savedJobs}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <View style={styles.jobCard}>
+                <View style={styles.jobInfo}>
+                  <Text style={styles.jobTitle}>{item.jobTitle}</Text>
+                  <Text style={styles.jobCompany}>{item.company}</Text>
 
-              <View style={styles.actions}>
-                <View
-                  style={[
-                    styles.statusBadge,
-                    item.apply ? styles.applyBadge : styles.appliedBadge,
-                  ]}
-                >
-                  <Text style={styles.statusText}>{item.status}</Text>
+                  {/* Display Colorful Tags */}
+                  <View style={styles.tagContainer}>
+                    {renderTag(item.workMode, "#87CEFA", `${item.id}-workMode`)}
+                    {renderTag(item.employmentType, "#4169E1", `${item.id}-employmentType`)}
+                    {renderTag(item.pay, "#E6E6FA", `${item.id}-pay`)}
+                  </View>
+
+                  <Text style={styles.jobDescription}>{item.description}</Text>
                 </View>
 
                 <TouchableOpacity>
-                  <Ionicons
-                    name={item.bookmarked ? "bookmark" : "bookmark-outline"}
-                    size={22}
-                    color="#1a1a1a"
-                  />
-                </TouchableOpacity>
-
-                <TouchableOpacity>
-                  <Ionicons
-                    name="chevron-forward-outline"
-                    size={22}
-                    color="#1a1a1a"
-                  />
+                  <Ionicons name="bookmark" size={22} color="#1a1a1a" />
                 </TouchableOpacity>
               </View>
-            </View>
-          )}
-        />
+            )}
+          />
+        )
       ) : (
-        <FlatList
-          key="events" // Forces re-render when switching tabs
-          data={savedEvents}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          columnWrapperStyle={styles.eventRow}
-          renderItem={({ item }) => (
-            <View style={styles.eventCard}>
-              <Image source={item.image} style={styles.eventImage} />
-              <Text style={styles.eventTitle}>{item.title}</Text>
-              <Text style={styles.eventDate}>{item.date}</Text>
-            </View>
-          )}
-        />
+        <View>
+          <Text style={styles.noJobsText}>No saved events yet.</Text>
+        </View>
       )}
     </View>
   );
@@ -193,10 +112,11 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "bold",
     color: "#000",
+    marginBottom: 15,
   },
   toggleContainer: {
     flexDirection: "row",
-    marginTop: 15,
+    marginBottom: 15,
   },
   toggleButton: {
     paddingVertical: 5,
@@ -224,14 +144,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 12,
     padding: 15,
-    marginTop: 10,
+    marginBottom: 10,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-  },
-  selectedJob: {
-    borderWidth: 2,
-    borderColor: "#4990e2",
   },
   jobInfo: {
     flex: 1,
@@ -241,74 +157,37 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#1a1a1a",
   },
+  jobCompany: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 5,
+  },
+  tagContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 8,
+  },
+  tag: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginRight: 6,
+  },
+  tagText: {
+    fontSize: 12,
+    color: "#fff",
+    fontWeight: "bold",
+  },
   jobDescription: {
     fontSize: 13,
     color: "#666",
   },
-  actions: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  statusBadge: {
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 12,
-    marginRight: 10,
-  },
-  appliedBadge: {
-    backgroundColor: "#ccc",
-  },
-  applyBadge: {
-    backgroundColor: "#4990e2",
-  },
-  statusText: {
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: "bold",
-  },
-  eventRow: {
-    justifyContent: "space-between",
-  },
-  eventCard: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 10,
-    marginVertical: 10,
-    alignItems: "center",
-    width: "48%",
-  },
-  eventImage: {
-    width: "100%",
-    height: 100,
-    borderRadius: 10,
-  },
-  eventTitle: {
-    fontSize: 14,
-    fontWeight: "bold",
+  noJobsText: {
+    fontSize: 16,
     textAlign: "center",
-    marginTop: 5,
-  },
-  eventDate: {
-    fontSize: 12,
-    color: "#666",
-    textAlign: "center",
-  },
-  postButton: {
-    position: "absolute",
-    bottom: 20,
-    right: 20,
-    backgroundColor: "#1a1a1a",
-    paddingVertical: 12,
-    paddingHorizontal: 18,
-    borderRadius: 25,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  postButtonText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "bold",
+    marginTop: 20,
   },
 });
+
+export default SavedScreen;
