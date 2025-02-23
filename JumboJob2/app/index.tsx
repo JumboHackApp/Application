@@ -1,14 +1,23 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { View, StyleSheet } from "react-native";
-import SwipeMain from "../Components/swipeMain"; // Import Questions.tsx
+import SwipeMain from "../Components/swipeMain";
+import Questions from "../Components/questions";
+import SplashScreen from "../Components/SplashScreen"; // Import SplashScreen component
 
 export default function Index() {
-  const [savedJobs, setSavedJobs] = useState<Job[]>([]); // Store saved jobs
+  const [savedJobs, setSavedJobs] = useState<Job[]>([]);
+  const [splashCompleted, setSplashCompleted] = useState(false);
+  const [questionsCompleted, setQuestionsCompleted] = useState(false);
 
   return (
     <View style={styles.container}>
-      <SwipeMain setSavedJobs={setSavedJobs} />  
+      {!splashCompleted ? (
+        <SplashScreen onAnimationComplete={() => setSplashCompleted(true)} />
+      ) : questionsCompleted ? (
+        <SwipeMain setSavedJobs={setSavedJobs} />
+      ) : (
+        <Questions onComplete={() => setQuestionsCompleted(true)} />
+      )}
     </View>
   );
 }

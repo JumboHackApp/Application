@@ -4,7 +4,7 @@ import { Dimensions } from "react-native";
 
 const { width, height } = Dimensions.get("window"); // Get screen size
 
-const Questions = () => {
+const Questions = ({ onComplete }) => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     name: "",
@@ -146,7 +146,7 @@ const Questions = () => {
           <>
             <Text style={styles.heading}>You're All Set!</Text>
             <Text style={styles.subtext}>Make sure to complete setting up your profile</Text>
-            <TouchableOpacity style={styles.doneButton}>
+            <TouchableOpacity onPress={onComplete} style={styles.doneButton}>
               <Text style={styles.doneButtonText}>Done</Text>
             </TouchableOpacity>
           </>
