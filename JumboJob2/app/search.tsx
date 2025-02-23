@@ -1,43 +1,119 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Image } from "react-native";
 import { useRouter } from "expo-router";
 import PostEvent from "../Components/postEvent";
+import { collection, getDocs, query, limit } from 'firebase/firestore';
+import { db } from '../Components/firebase';
 
 interface Job {
   id: string;
-  title: string;
+  jobTitle: string;
   company: string;
+  location: string;
+  workMode: string;
+  employmentType: string;
+  pay: string;
+  description: string;
 }
 
 interface Event {
   id: string;
-  title: string;
+  name: string;
   location: string;
+  time: { toDate: () => Date };
+  description: string;
+  imageLink: string;
 }
 
-const jobsData: Job[] = [
-  { id: "1", title: "Software Engineer Intern", company: "Google" },
-  { id: "2", title: "Data Analyst", company: "Facebook" },
-  { id: "3", title: "UI/UX Designer", company: "Apple" },
-  { id: "4", title: "Machine Learning Engineer", company: "Tesla" },
-];
-
-const eventsData: Event[] = [
-  { id: "1", title: "Hackathon 2025", location: "Boston, MA" },
-  { id: "2", title: "AI & Robotics Conference", location: "San Francisco, CA" },
-  { id: "3", title: "Startups Networking", location: "New York, NY" },
-  { id: "4", title: "Tech Leadership Summit", location: "Seattle, WA" },
-];
+const DEFAULT_IMAGE = 'https://via.placeholder.com/300x200?text=Event';
 
 export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState(["Bio Fabrication", "UI/UX"]);
   const [activeTab, setActiveTab] = useState("Jobs");
   const [showPostEvent, setShowPostEvent] = useState(false);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
 
-  const filteredResults = (activeTab === "Jobs" ? jobsData : eventsData).filter((item) =>
-    item.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    const fetchData = async () => {
+      if (activeTab === "Jobs") {
+        const jobsQuery = query(collection(db, 'jobs'), limit(40));
+        const jobsSnapshot = await getDocs(jobsQuery);
+        const jobsList = jobsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        } as Job));
+        setJobs(jobsList);
+      } else {
+        const eventsQuery = query(collection(db, 'events'), limit(40));
+        const eventsSnapshot = await getDocs(eventsQuery);
+        const eventsList = eventsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        } as Event));
+        setEvents(eventsList);
+      }
+    };
+
+    fetchData();
+  }, [activeTab]);
+
+  const filteredResults = activeTab === "Jobs" 
+    ? jobs.filter(job => job.jobTitle.toLowerCase().includes(searchQuery.toLowerCase()))
+    : events.filter(event => event.name.toLowerCase().includes(searchQuery.toLowerCase()));
+
+  const renderItem = ({ item }: { item: Job | Event }) => {
+    if (activeTab === "Jobs") {
+      return (
+        <View style={styles.jobCard}>
+          <View style={styles.jobMainContent}>
+            <View style={styles.jobInfo}>
+              <Text style={styles.jobTitle} numberOfLines={1}>
+                {(item as Job).jobTitle}
+              </Text>
+              <Text style={styles.jobCompany} numberOfLines={1}>
+                {(item as Job).company}
+              </Text>
+              <Text style={styles.jobDetails}>
+                {(item as Job).location} · {(item as Job).workMode}
+              </Text>
+            </View>
+            <View style={styles.salaryContainer}>
+              <Text style={styles.salaryText}>
+                {(item as Job).pay}
+              </Text>
+            </View>
+          </View>
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.eventCard}>
+        <Image 
+          source={{ uri: (item as Event).imageLink || DEFAULT_IMAGE }}
+          style={styles.eventImage}
+          defaultSource={{ uri: DEFAULT_IMAGE }}
+          onError={(e) => {
+            console.log('Image loading error:', e.nativeEvent.error);
+          }}
+        />
+        <View style={styles.eventContent}>
+          <Text style={styles.eventTitle} numberOfLines={2}>
+            {(item as Event).name}
+          </Text>
+          <Text style={styles.eventLocation} numberOfLines={1}>
+            {(item as Event).location}
+          </Text>
+          <Text style={styles.eventTime}>
+            {(item as Event).time.toDate().toLocaleDateString()}
+          </Text>
+        </View>
+      </View>
+    );
+  };
+
   const router = useRouter();
   
   const handleShowPostEvent = () => setShowPostEvent(true);
@@ -106,18 +182,13 @@ export default function SearchScreen() {
       </View>
 
       <FlatList
+        key={activeTab}
         data={filteredResults}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.resultItem}>
-            <Text style={styles.resultTitle}>{item.title}</Text>
-            <Text style={styles.resultSubtitle}>
-              {activeTab === "Jobs" 
-                ? `Company: ${(item as Job).company}` 
-                : `Location: ${(item as Event).location}`}
-            </Text>
-          </View>
-        )}
+        renderItem={renderItem}
+        numColumns={activeTab === "Events" ? 2 : 1}
+        columnWrapperStyle={activeTab === "Events" ? styles.row : undefined}
+        contentContainerStyle={activeTab === "Jobs" ? styles.jobsList : undefined}
       />
 
       {activeTab === "Events" && (
@@ -217,20 +288,88 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginLeft: 2,
   },
-  resultItem: {
-    backgroundColor: "#fff",
+  row: {
+    flex: 1,
+    justifyContent: 'space-between',
+    paddingHorizontal: 5,
+  },
+  jobCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginVertical: 8,
     padding: 15,
-    borderRadius: 10,
-    marginTop: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  resultTitle: {
+  jobMainContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  jobInfo: {
+    flex: 1,
+    marginRight: 10,
+  },
+  jobTitle: {
     fontSize: 16,
-    fontWeight: "bold",
-    color: "#1a1a1a",
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
   },
-  resultSubtitle: {
+  jobCompany: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+  },
+  jobDetails: {
     fontSize: 13,
-    color: "#666",
+    color: '#666',
+  },
+  salaryContainer: {
+    alignItems: 'flex-end',
+  },
+  salaryText: {
+    fontSize: 14,
+    color: '#4990e2',
+    fontWeight: '500',
+  },
+  eventCard: {
+    flex: 0.48,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginVertical: 8,
+    overflow: 'hidden',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  eventImage: {
+    width: '100%',
+    height: 120,
+    resizeMode: 'cover',
+  },
+  eventContent: {
+    padding: 10,
+  },
+  eventTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  eventLocation: {
+    fontSize: 12,
+    color: '#666',
+  },
+  eventTime: {
+    fontSize: 11,
+    color: '#999',
+    marginTop: 2,
   },
   postButton: {
     position: "absolute",
@@ -249,5 +388,8 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
     fontWeight: "bold",
+  },
+  jobsList: {
+    paddingHorizontal: 15,
   },
 });

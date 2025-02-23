@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, PanResponder, Animated, Dimensions } from 'react-native';
+import { collection, getDocs, query, limit } from 'firebase/firestore';
+import { db } from '../Components/firebase';
 
 interface Job {
   id: string;
-  title: string;
-  details: string;
+  jobTitle: string;
   company: string;
   location: string;
-  degree: 'Bachelors' | 'Masters' | 'PhD';
-  type: 'Internship' | 'Part-time' | 'Full-time';
-  workLocation: 'In-person' | 'Remote' | 'Hybrid';
-  experience: string;
-  skills: string[];
+  workMode: 'In-person' | 'Remote' | 'Hybrid';
+  employmentType: 'Full-time' | 'Part-time' | 'Internship';
+  pay: string;
+  description: string;
 }
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -19,35 +19,28 @@ const SWIPE_THRESHOLD = 0.25 * SCREEN_WIDTH;
 const SWIPE_OUT_DURATION = 250;
 
 const SwipeMain: React.FC<{ setSavedJobs: React.Dispatch<React.SetStateAction<Job[]>> }> = ({ setSavedJobs }) => {
-  const [jobs, setJobs] = useState<Job[]>([
-    {
-      id: '1',
-      title: 'Software Engineer',
-      details: 'Looking for a passionate developer with React Native experience...',
-      company: 'Tech Corp',
-      location: 'Boston, MA',
-      degree: 'Bachelors',
-      type: 'Full-time',
-      workLocation: 'Hybrid',
-      experience: '2+ years',
-      skills: ['React Native', 'JavaScript', 'Node.js']
-    },
-    {
-      id: '2',
-      title: 'Frontend Developer',
-      details: 'Join our team building modern web applications...',
-      company: 'Web Solutions Inc',
-      location: 'New York, NY',
-      degree: 'Bachelors',
-      type: 'Internship',
-      workLocation: 'Remote',
-      experience: '0-1 year',
-      skills: ['HTML', 'CSS', 'JavaScript', 'React']
-    }
-  ]);
-
+  const [jobs, setJobs] = useState<Job[]>([]);
   const [currentJobIndex, setCurrentJobIndex] = useState(0);
   const position = new Animated.ValueXY();
+
+  // Fetch jobs from Firestore
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const jobsQuery = query(collection(db, 'jobs'), limit(40));
+        const jobsSnapshot = await getDocs(jobsQuery);
+        const jobsList = jobsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        } as Job));
+        setJobs(jobsList);
+      } catch (error) {
+        console.error('Error fetching jobs:', error);
+      }
+    };
+
+    fetchJobs();
+  }, []);
 
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
@@ -75,15 +68,12 @@ const SwipeMain: React.FC<{ setSavedJobs: React.Dispatch<React.SetStateAction<Jo
   };
 
   const onSwipeComplete = (direction: 'right' | 'left') => {
-    if (currentJobIndex >= jobs.length) {
-      return; // Prevent accessing undefined jobs
-    }
+    if (currentJobIndex >= jobs.length) return;
 
     const item = jobs[currentJobIndex];
-
     if (item) {
       if (direction === 'right') {
-        setSavedJobs((prev) => [...prev, item]); // Save job when swiping right
+        setSavedJobs(prev => [...prev, item]); // Save job when swiped right
         console.log('Interested in:', item);
       } else {
         console.log('Not interested in:', item);
@@ -145,42 +135,24 @@ const SwipeMain: React.FC<{ setSavedJobs: React.Dispatch<React.SetStateAction<Jo
       >
         <View style={styles.cardHeader}>
           <Text style={styles.titleText} numberOfLines={2}>
-            {job.title}
+            {job.jobTitle}
           </Text>
           <Text style={styles.companyText} numberOfLines={1}>
             {job.company} - {job.location}
           </Text>
         </View>
 
+        {/* Circles below the title */}
+        <View style={styles.tagContainer}>
+          {renderTag(job.workMode, '#87CEFA', `${job.id}-workMode`)}
+          {renderTag(job.employmentType, '#4169E1', `${job.id}-employmentType`)}
+          {renderTag(job.pay, '#E6E6FA', `${job.id}-pay`)}
+        </View>
+
         <View style={styles.cardBody}>
-          <Text style={styles.detailsText} numberOfLines={4}>
-            {job.details}
+          <Text style={styles.detailsText} numberOfLines={10}>
+            {job.description}
           </Text>
-
-          <View style={styles.tagsSection}>
-            <Text style={styles.sectionTitle}>Requirements</Text>
-            <View style={styles.tagContainer}>
-              {renderTag(job.workLocation, '#87CEFA', `${job.id}-location`)}
-              {renderTag(job.type, '#4169E1', `${job.id}-type`)}
-              {renderTag(job.degree, '#E6E6FA', `${job.id}-degree`)}
-            </View>
-          </View>
-
-          <View style={styles.tagsSection}>
-            <Text style={styles.sectionTitle}>Experience</Text>
-            <View style={styles.tagContainer}>
-              {renderTag(job.experience, '#98FB98', `${job.id}-experience`)}
-            </View>
-          </View>
-
-          <View style={styles.tagsSection}>
-            <Text style={styles.sectionTitle}>Skills</Text>
-            <View style={styles.tagContainer}>
-              {job.skills.map((skill, index) => (
-                renderTag(skill, '#E0FFFF', `${job.id}-skill-${index}`)
-              ))}
-            </View>
-          </View>
         </View>
       </Animated.View>
     );
@@ -195,17 +167,17 @@ const SwipeMain: React.FC<{ setSavedJobs: React.Dispatch<React.SetStateAction<Jo
 
 const styles = StyleSheet.create({
   container: {
-    width: 320,
-    height: 590,
+    width: 350,
+    height: 700, // Increased height for longer description
     backgroundColor: '#d6e6f6',
     justifyContent: 'center',
     alignItems: 'center'
   },
   cardStyle: {
-    width: 280,
-    aspectRatio: 0.7,
+    width: 320, // Increased width
+    aspectRatio: 0.8, // Adjusted aspect ratio for more vertical space
     borderRadius: 20,
-    padding: 15,
+    padding: 20,
     backgroundColor: '#ffffff',
     elevation: 3,
     shadowColor: '#000',
@@ -220,12 +192,12 @@ const styles = StyleSheet.create({
     marginBottom: 10
   },
   titleText: {
-    fontSize: 22,
+    fontSize: 24, // Increased font size
     fontWeight: 'bold',
     color: '#333'
   },
   companyText: {
-    fontSize: 16,
+    fontSize: 18, // Slightly bigger
     color: '#666',
     marginTop: 3
   },
@@ -234,22 +206,16 @@ const styles = StyleSheet.create({
     gap: 12
   },
   detailsText: {
-    fontSize: 15,
+    fontSize: 16, // Bigger text
     color: '#444',
-    lineHeight: 22
-  },
-  tagsSection: {
-    gap: 8
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333'
+    lineHeight: 24
   },
   tagContainer: {
     flexDirection: 'row',
+    justifyContent: 'center', // Centering tags under the title
     flexWrap: 'wrap',
-    gap: 8
+    gap: 8,
+    marginBottom: 12 // Space before description
   },
   tag: {
     paddingHorizontal: 12,
